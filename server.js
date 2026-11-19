@@ -7,6 +7,8 @@ const authRoutes = require('./routes/authRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./config/swagger');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Load environment variables
@@ -20,6 +22,9 @@ const app = express();
 // Standard Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Interactive Swagger API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // API Routes
 app.use('/api/auth', authRoutes);
