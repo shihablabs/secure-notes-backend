@@ -1,12 +1,14 @@
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
-    title: 'Secure Note-Taking API',
+    title: 'Secure Notes API',
     version: '1.0.0',
-    description: 'REST API for Technical Interview: JWT Authentication, Role-Based Access Control (User/Admin), Strict Database Indexing, and MongoDB Aggregation Pipelines (Scenario 1 & 2).'
+    description: 'Clean REST API for Notes, Authentication, and MongoDB Aggregations.'
   },
   servers: [
-    { url: 'http://localhost:5000', description: 'Local Development Server' }
+    { url: 'https://secure-notes-backend-qykh.onrender.com', description: 'Live Production (Render)' },
+    { url: 'http://localhost:5000', description: 'Local Development' },
+    { url: '/', description: 'Current Host' }
   ],
   components: {
     securitySchemes: {
@@ -20,52 +22,45 @@ const swaggerDocument = {
   paths: {
     '/api/health': {
       get: {
-        tags: ['Health Check'],
-        summary: 'System and MongoDB Connection Health Check',
-        responses: {
-          200: { description: 'System health status and DB connection state' }
-        }
+        tags: ['System'],
+        summary: 'Check API and Database Health',
+        responses: { 200: { description: 'OK' } }
       }
     },
     '/api/auth/register': {
       post: {
-        tags: ['Authentication'],
-        summary: 'Register a new user account',
+        tags: ['Auth'],
+        summary: 'Register new user',
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['name', 'email', 'password'],
                 properties: {
-                  name: { type: 'string', example: 'Shihab Candidate' },
+                  name: { type: 'string', example: 'Shihab' },
                   email: { type: 'string', example: 'shihab@example.com' },
-                  password: { type: 'string', example: 'Password123!' },
-                  role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
-                  interests: { type: 'array', items: { type: 'string' }, example: ['chess', 'reading'] }
+                  password: { type: 'string', example: 'password123' },
+                  role: { type: 'string', example: 'user' },
+                  interests: { type: 'array', items: { type: 'string' }, example: ['coding', 'reading'] }
                 }
               }
             }
           }
         },
-        responses: {
-          201: { description: 'User successfully registered' },
-          400: { description: 'Validation error or email already in use' }
-        }
+        responses: { 201: { description: 'Registered' } }
       }
     },
     '/api/auth/login': {
       post: {
-        tags: ['Authentication'],
-        summary: 'Authenticate user and obtain JWT Bearer token',
+        tags: ['Auth'],
+        summary: 'Login and get JWT token',
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['email', 'password'],
                 properties: {
                   email: { type: 'string', example: 'admin@demo.com' },
                   password: { type: 'string', example: 'password123' }
@@ -74,40 +69,31 @@ const swaggerDocument = {
             }
           }
         },
-        responses: {
-          200: { description: 'Authentication successful with JWT token' },
-          401: { description: 'Invalid email or password' }
-        }
+        responses: { 200: { description: 'Token returned' } }
       }
     },
     '/api/auth/profile': {
       get: {
-        tags: ['Authentication'],
-        summary: 'Retrieve currently authenticated user profile',
+        tags: ['Auth'],
+        summary: 'Get current user profile',
         security: [{ bearerAuth: [] }],
-        responses: {
-          200: { description: 'User profile details' },
-          401: { description: 'Unauthorized' }
-        }
+        responses: { 200: { description: 'Profile data' } }
       }
     },
     '/api/notes': {
       get: {
-        tags: ['Notes Repository'],
-        summary: 'Get notes with pagination (Users see own, Admin sees all)',
+        tags: ['Notes'],
+        summary: 'Get notes (paginated)',
         security: [{ bearerAuth: [] }],
         parameters: [
           { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 6 } }
         ],
-        responses: {
-          200: { description: 'Paginated notes list' },
-          401: { description: 'Unauthorized' }
-        }
+        responses: { 200: { description: 'List of notes' } }
       },
       post: {
-        tags: ['Notes Repository'],
-        summary: 'Create a new secure note',
+        tags: ['Notes'],
+        summary: 'Create a note',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -115,35 +101,28 @@ const swaggerDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['title', 'content'],
                 properties: {
-                  title: { type: 'string', example: 'System Architecture Notes' },
-                  content: { type: 'string', example: 'MongoDB compound indexes and ESR rules.' }
+                  title: { type: 'string', example: 'Meeting Note' },
+                  content: { type: 'string', example: 'Discuss project architecture.' }
                 }
               }
             }
           }
         },
-        responses: {
-          201: { description: 'Note created successfully' },
-          400: { description: 'Validation error' }
-        }
+        responses: { 201: { description: 'Created' } }
       }
     },
     '/api/notes/{id}': {
       get: {
-        tags: ['Notes Repository'],
-        summary: 'Get single note by ID',
+        tags: ['Notes'],
+        summary: 'Get note by ID',
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: { description: 'Note details' },
-          404: { description: 'Note not found' }
-        }
+        responses: { 200: { description: 'Note data' } }
       },
       put: {
-        tags: ['Notes Repository'],
-        summary: 'Update note by ID',
+        tags: ['Notes'],
+        summary: 'Update note',
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: {
@@ -153,56 +132,44 @@ const swaggerDocument = {
               schema: {
                 type: 'object',
                 properties: {
-                  title: { type: 'string' },
-                  content: { type: 'string' }
+                  title: { type: 'string', example: 'Updated Note' },
+                  content: { type: 'string', example: 'Updated content here.' }
                 }
               }
             }
           }
         },
-        responses: {
-          200: { description: 'Note updated' },
-          403: { description: 'Forbidden' },
-          404: { description: 'Note not found' }
-        }
+        responses: { 200: { description: 'Updated' } }
       },
       delete: {
-        tags: ['Notes Repository'],
-        summary: 'Delete note by ID',
+        tags: ['Notes'],
+        summary: 'Delete note',
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: { description: 'Note deleted' },
-          403: { description: 'Forbidden' },
-          404: { description: 'Note not found' }
-        }
+        responses: { 200: { description: 'Deleted' } }
       }
     },
     '/api/users/by-interests': {
       get: {
-        tags: ['MongoDB Aggregations'],
-        summary: 'Scenario 1: Group Users by Interests (Single aggregate pipeline)',
+        tags: ['Aggregations'],
+        summary: 'Scenario 1: Group users by interests',
         security: [{ bearerAuth: [] }],
-        responses: {
-          200: { description: 'Interests grouped with count and member names' }
-        }
+        responses: { 200: { description: 'Grouped interests array' } }
       }
     },
     '/api/posts': {
       get: {
-        tags: ['Community Posts'],
-        summary: 'Get public posts with pagination',
+        tags: ['Posts'],
+        summary: 'Get community posts',
         parameters: [
           { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
         ],
-        responses: {
-          200: { description: 'Public posts list' }
-        }
+        responses: { 200: { description: 'List of posts' } }
       },
       post: {
-        tags: ['Community Posts'],
-        summary: 'Publish a new post',
+        tags: ['Posts'],
+        summary: 'Create a post',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -210,48 +177,39 @@ const swaggerDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['title', 'content'],
                 properties: {
-                  title: { type: 'string', example: 'MongoDB Indexing Best Practices' },
-                  content: { type: 'string', example: 'Always index fields used in foreignField for $lookup.' }
+                  title: { type: 'string', example: 'Community Post' },
+                  content: { type: 'string', example: 'Excited about the interview!' }
                 }
               }
             }
           }
         },
-        responses: {
-          201: { description: 'Post published' }
-        }
+        responses: { 201: { description: 'Created' } }
       }
     },
     '/api/posts/user/{id}': {
       get: {
-        tags: ['MongoDB Aggregations'],
-        summary: 'Scenario 2: User Posts ($lookup single pipeline)',
+        tags: ['Aggregations'],
+        summary: 'Scenario 2: User Posts ($lookup)',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: { description: 'User details with joined posts array' },
-          404: { description: 'User not found' }
-        }
+        responses: { 200: { description: 'User with joined posts' } }
       }
     },
     '/api/users': {
       get: {
-        tags: ['Admin Management'],
-        summary: 'List users with pagination (Admin only)',
+        tags: ['Admin'],
+        summary: 'List users (Admin only)',
         security: [{ bearerAuth: [] }],
         parameters: [
           { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
           { name: 'limit', in: 'query', schema: { type: 'integer', default: 5 } }
         ],
-        responses: {
-          200: { description: 'Paginated user list' },
-          403: { description: 'Admin access required' }
-        }
+        responses: { 200: { description: 'Users list' } }
       },
       post: {
-        tags: ['Admin Management'],
-        summary: 'Enroll new user with role assignment (Admin only)',
+        tags: ['Admin'],
+        summary: 'Add user (Admin only)',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -259,33 +217,27 @@ const swaggerDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['name', 'email', 'password'],
                 properties: {
-                  name: { type: 'string', example: 'Auditor User' },
-                  email: { type: 'string', example: 'auditor@example.com' },
-                  password: { type: 'string', example: 'auditPass123' },
-                  role: { type: 'string', enum: ['user', 'admin'], default: 'user' },
-                  interests: { type: 'array', items: { type: 'string' } }
+                  name: { type: 'string', example: 'New User' },
+                  email: { type: 'string', example: 'newuser@example.com' },
+                  password: { type: 'string', example: 'password123' },
+                  role: { type: 'string', example: 'user' },
+                  interests: { type: 'array', items: { type: 'string' }, example: ['tech'] }
                 }
               }
             }
           }
         },
-        responses: {
-          201: { description: 'User enrolled' }
-        }
+        responses: { 201: { description: 'User created' } }
       }
     },
     '/api/users/{id}': {
       delete: {
-        tags: ['Admin Management'],
-        summary: 'Remove user from system (Admin only)',
+        tags: ['Admin'],
+        summary: 'Delete user (Admin only)',
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: { description: 'User removed' },
-          403: { description: 'Admin access required' }
-        }
+        responses: { 200: { description: 'User deleted' } }
       }
     }
   }
