@@ -2,12 +2,28 @@ const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const { getPagination } = require('../utils/pagination');
 
-// admin: get all users with pagination
+// admin: get all users with pagination, keyword search, and role filter
 const getUsers = asyncHandler(async (req, res) => {
   const { page, limit, skip } = getPagination(req.query, 10);
 
-  const totalUsers = await User.countDocuments();
-  const users = await User.find()
+  let filter = {};
+
+  // Keyword search by name or email
+  if (req.query.search && req.query.search.trim()) {
+    const searchRegex = new RegExp(req.query.search.trim(), 'i');
+    filter.$or = [
+      { name: searchRegex },
+      { email: searchRegex }
+    ];
+  }
+
+  // Filter by role (user / admin)
+  if (req.query.role && ['user', 'admin'].includes(req.query.role)) {
+    filter.role = req.query.role;
+  }
+
+  const totalUsers = await User.countDocuments(filter);
+  const users = await User.find(filter)
     .select('-password')
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -16,7 +32,7 @@ const getUsers = asyncHandler(async (req, res) => {
   res.json({
     users,
     page,
-    pages: Math.ceil(totalUsers / limit),
+    pages: Math.ceil(totalUsers / limit) || 1,
     totalUsers
   });
 });
@@ -25,17 +41,33 @@ const getUsers = asyncHandler(async (req, res) => {
 const addUser = asyncHandler(async (req, res) => {
   const { name, email, password, role, interests } = req.body;
 
-  const userExists = await User.findOne({ email });
+  if (!name || !name.trim()) {
+    return res.status(400).json({ message: 'Full name is required' });
+  }
+
+  if (!email || !email.trim()) {
+    return res.status(400).json({ message: 'Valid email address is required' });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+  const userExists = await User.findOne({ email: cleanEmail });
   if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+    return res.status(400).json({ message: 'A user account with this email address already exists' });
+  }
+
+  let parsedInterests = [];
+  if (Array.isArray(interests)) {
+    parsedInterests = interests.filter(Boolean);
+  } else if (typeof interests === 'string' && interests.trim()) {
+    parsedInterests = interests.split(',').map((i) => i.trim()).filter(Boolean);
   }
 
   const user = await User.create({
-    name,
-    email,
+    name: name.trim(),
+    email: cleanEmail,
     password: password || '123456',
     role: role || 'user',
-    interests: interests || []
+    interests: parsedInterests
   });
 
   res.status(201).json({

@@ -60,6 +60,15 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// Process safety handlers to prevent abrupt process termination
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err && err.message ? err.message : err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception caught:', err && err.message ? err.message : err);
+});
+
 // graceful shutdown
 const shutdown = async () => {
   server.close(async () => {

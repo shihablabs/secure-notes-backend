@@ -19,7 +19,7 @@ const createNote = asyncHandler(async (req, res) => {
   res.status(201).json(note);
 });
 
-// get notes with pagination (user sees own, admin sees all)
+// get notes with pagination, search, and dynamic sorting (user sees own, admin sees all)
 const getNotes = asyncHandler(async (req, res) => {
   const { page, limit, skip } = getPagination(req.query, 10);
 
@@ -28,17 +28,34 @@ const getNotes = asyncHandler(async (req, res) => {
     filter.user = req.user._id;
   }
 
+  // Dynamic server-side keyword search (title and content)
+  if (req.query.search && req.query.search.trim()) {
+    const searchRegex = new RegExp(req.query.search.trim(), 'i');
+    filter.$or = [
+      { title: searchRegex },
+      { content: searchRegex }
+    ];
+  }
+
+  // Dynamic sorting options
+  let sortOption = { createdAt: -1 }; // default newest first
+  if (req.query.sort === 'oldest') {
+    sortOption = { createdAt: 1 };
+  } else if (req.query.sort === 'alpha') {
+    sortOption = { title: 1 };
+  }
+
   const totalNotes = await Note.countDocuments(filter);
   const notes = await Note.find(filter)
     .populate('user', 'name email role')
-    .sort({ createdAt: -1 })
+    .sort(sortOption)
     .skip(skip)
     .limit(limit);
 
   res.json({
     notes,
     page,
-    pages: Math.ceil(totalNotes / limit),
+    pages: Math.ceil(totalNotes / limit) || 1,
     totalNotes
   });
 });
