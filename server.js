@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const noteRoutes = require('./routes/noteRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // Load environment variables
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/notes', noteRoutes);
 
 // Root test route
 app.get('/', (req, res) => {
