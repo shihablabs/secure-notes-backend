@@ -7,7 +7,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 // Connect to MongoDB Atlas (freeCodeCamp standard pattern)
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Database Connection Error: ${error.message}`);
