@@ -27,6 +27,19 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  const states = ['Disconnected', 'Connected', 'Connecting', 'Disconnecting'];
+
+  res.json({
+    status: dbState === 1 ? 'healthy' : 'degraded',
+    database: states[dbState] || 'Unknown',
+    uptime: `${Math.floor(process.uptime())}s`,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root test route
 app.get('/', (req, res) => {
   res.json({ message: 'Secure Notes API is running cleanly...' });
