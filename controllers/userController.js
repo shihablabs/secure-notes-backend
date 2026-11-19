@@ -18,8 +18,11 @@ const getUsers = asyncHandler(async (req, res) => {
   }
 
   // Filter by role (user / admin)
-  if (req.query.role && ['user', 'admin'].includes(req.query.role)) {
-    filter.role = req.query.role;
+  if (req.query.role && typeof req.query.role === 'string') {
+    const cleanRole = req.query.role.trim().toLowerCase();
+    if (['user', 'admin'].includes(cleanRole)) {
+      filter.role = cleanRole;
+    }
   }
 
   const totalUsers = await User.countDocuments(filter);
