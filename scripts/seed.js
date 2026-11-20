@@ -85,11 +85,13 @@ const seedDatabase = async () => {
     }
     console.log(`Created ${createdUsers.length} user accounts.`);
 
-    const adminUser = createdUsers[0]; // Shihab Admin
-    const userAlex = createdUsers[2];  // Alex Rivera
-    const userFatima = createdUsers[3]; // Fatima Zahra
-    const userDavid = createdUsers[4];  // David Kim
-    const userEmily = createdUsers[5];  // Emily Watson
+    const adminUser = createdUsers.find(u => u.email === 'admin@securenotes.com');
+    const demoAdmin = createdUsers.find(u => u.email === 'admin@demo.com');
+    const demoUser = createdUsers.find(u => u.email === 'user@demo.com');
+    const userAlex = createdUsers.find(u => u.email === 'alex.rivera@example.com');
+    const userFatima = createdUsers.find(u => u.email === 'fatima.zahra@example.com');
+    const userDavid = createdUsers.find(u => u.email === 'david.kim@example.com');
+    const userEmily = createdUsers.find(u => u.email === 'emily.watson@example.com');
 
     console.log('Seeding rich-text demo notes...');
     const notesData = [
@@ -104,9 +106,14 @@ const seedDatabase = async () => {
         user: adminUser._id
       },
       {
+        title: 'Welcome to SecureNotes Demo Account',
+        content: '<p>Welcome to the <strong>SecureNotes Enterprise</strong> personal workspace!</p><p>This is a pre-loaded demonstration note showcasing formatting capabilities:</p><ul><li>End-to-end JWT authenticated sessions.</li><li>Role-based access permissions.</li><li>High-performance indexed queries.</li></ul><p>Feel free to edit, view details, export to CSV, or compose new encrypted notes.</p>',
+        user: demoUser._id
+      },
+      {
         title: 'Frontend Architecture & State Management Guidelines',
         content: '<p>Here are the core engineering standards for the React 19 client environment:</p><ol><li><strong>Controlled Inputs:</strong> Never leave state as undefined; default to empty strings.</li><li><strong>Debounced Requests:</strong> Use 250ms debouncing on all search filter bars to prevent query floods.</li><li><strong>Safe HTML Entity Parsing:</strong> Always decode HTML entities before rendering card preview summaries.</li></ol>',
-        user: userAlex._id
+        user: demoUser._id
       },
       {
         title: 'Comprehensive Research: Modern Distributed Systems & Microservices',
