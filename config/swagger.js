@@ -1,21 +1,21 @@
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
-    title: 'Secure Notes API',
+    title: 'Secure Notes API (Live Production)',
     version: '1.0.0',
-    description: 'Clean REST API for Notes, Authentication, and MongoDB Aggregations.'
+    description: '### 🚀 Quick Testing Guide:\n1. **Get Token:** Go to **POST /api/auth/login** below -> click **Try it out** -> click **Execute** (admin credentials are pre-filled).\n2. **Authorize:** Copy the `token` string from the response -> click the green **Authorize 🔓** button at the top-right -> paste the token -> click **Authorize**.\n3. **Test Any API:** Now all protected endpoints (Notes, Users, Aggregations) can be executed with 1 click!'
   },
   servers: [
     { url: 'https://secure-notes-backend-qykh.onrender.com', description: 'Live Production (Render)' },
-    { url: 'http://localhost:5000', description: 'Local Development' },
-    { url: '/', description: 'Current Host' }
+    { url: '/', description: 'Current Server' }
   ],
   components: {
     securitySchemes: {
       bearerAuth: {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'JWT'
+        bearerFormat: 'JWT',
+        description: 'Paste your JWT token string here. (Get it from POST /api/auth/login below with admin@securenotes.com / Password123!)'
       }
     }
   },
@@ -40,7 +40,7 @@ const swaggerDocument = {
                 properties: {
                   name: { type: 'string', example: 'Shihab' },
                   email: { type: 'string', example: 'shihab@example.com' },
-                  password: { type: 'string', example: 'password123' },
+                  password: { type: 'string', example: 'Password123!' },
                   role: { type: 'string', example: 'user' },
                   interests: { type: 'array', items: { type: 'string' }, example: ['coding', 'reading'] }
                 }
@@ -54,7 +54,7 @@ const swaggerDocument = {
     '/api/auth/login': {
       post: {
         tags: ['Auth'],
-        summary: 'Login and get JWT token',
+        summary: 'Login and get JWT token (Pre-filled Admin)',
         requestBody: {
           required: true,
           content: {
@@ -62,8 +62,8 @@ const swaggerDocument = {
               schema: {
                 type: 'object',
                 properties: {
-                  email: { type: 'string', example: 'admin@demo.com' },
-                  password: { type: 'string', example: 'password123' }
+                  email: { type: 'string', example: 'admin@securenotes.com' },
+                  password: { type: 'string', example: 'Password123!' }
                 }
               }
             }
